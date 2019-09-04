@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Elastic collision</title>
+<meta charset="utf-8" />
+<style>
+h2 {
+	font-size:	100%;
+}
+</style>
+</head>
+<body>
+<main>
+<article>
+<h1>A simulation model of an elastic collision</h1>
+<p>This JavaScript program simulates a ball bouncing in a dual-gravity environment where acceleration can be set by the user in the horizontal (ax) and vertical (ay) directions. Changing ax or ay will take an immediate effect.</p>
+<section>
+<h2>Program information</h2>
+<table style="border:0px;">
+<tr><td>Program:</td><td>Elastic collision</td></tr>
+<tr><td>Purpose:</td><td>Demonstration of a bouncing ball in a dual-gravity environment</td></tr>
+<tr><td>Author:</td><td>Huidae Cho</td></tr>
+<tr><td>Copyright:</td><td>(C) 2017, 2019, Huidae Cho &lt;<a href="https://idea.isnew.info">https://idea.isnew.info</a>&gt;</td>
+<tr><td>License:</td><td>GNU Affero General Public License v3</td></tr>
+</table>
+</section>
+<section>
+<h2>Model parameters: acceleration in x and y</h2>
+<table style="border:0px;">
+<tr><td>ax:</td><td><input id="ax" oninput="ball.x.acc=parseFloat(this.value)*0.1; reanimate()" /></td><td>ay:</td><td><input id="ay" oninput="ball.y.acc=parseFloat(this.value)*0.1; reanimate()" /></td></tr>
+<tr><td>vx:</td><td><input id="vx" readonly="readonly" /></td><td>vy:</td><td><input id="vy" readonly="readonly" /></td></tr>
+<tr><td style="text-align:right;">x:</td><td><input id="x" readonly="readonly" /></td><td style="text-align:right;">y:</td><td><input id="y" readonly="readonly" /></td></tr>
+</table>
+<canvas id="canvas-elastic-collision" width="500" height="500"></canvas>
+<script>
+var canvas = document.getElementById('canvas-elastic-collision');
+var context = canvas.getContext('2d');
+var wall = {
+  mass: 100000
+};
+var ball = {
+  radius: 0,
+  density: 1,
+  mass: 0,
+  x: {
+    pos: 0,
+    vel: 0,
+    acc: 0.0*9.81,
+    loss: 1, // loss from impact
+    loss2: 0.01, // loss in x from y impact
+  },
+  y: {
+    pos: 0,
+    vel: 0,
+    acc: 0.1*9.81,
+    loss: 1, // loss from impact
+    loss2: 0.01, // loss in y from x impact
+  }
+};
+var Draw = {
+  rectangle: function (x, y, w, h) {
+    context.beginPath();
+    context.rect(x, y, w, h);
+    context.fillStyle = '#8ED6FF';
+    context.fill();
+    context.lineWidth = 2;
+    context.strokeStyle = 'black';
+    context.stroke();
+  },
+  circle: function(x, y, r) {
+    context.beginPath();
+    context.arc(x, y, r, 0, 2 * Math.PI, false);
+    context.fillStyle = 'green';
+    context.fill();
+    context.lineWidth = 2;
+    context.strokeStyle = '#003300';
+    context.stroke();
+  }
+};
+function move(coor1, coor2, min, max) {
+  var vel1 = coor1.vel + coor1.acc;
+  if (coor1.pos + vel1 >= min && coor1.pos + vel1 <= max) {
+    coor1.vel = vel1;
+    coor1.pos += coor1.vel;
+  } else {
+    var wallPos = coor1.pos + vel1 < min ? min : max;
+    var t = (wallPos - coor1.pos) / vel1; // fraction of time before impact
+    vel1 = coor1.vel + coor1.acc * t; // partially accelerated
+    // conservations of momentum and kinetic energy
+    coor1.vel = (ball.mass - wall.mass) / (ball.mass + wall.mass) * vel1;
+    // other losses in coor1 from coor1 impact
+    if (Math.abs(coor1.vel) > coor1.loss)
+      coor1.vel = Math.sign(coor1.vel) * (Math.abs(coor1.vel) - coor1.loss);
+    else
+      coor1.vel = 0;
+    coor1.pos = wallPos + coor1.vel;
+    // other losses in coor2 from coor1 impact
+    if (Math.abs(coor2.vel) > coor2.loss2)
+      coor2.vel = Math.sign(coor2.vel) * (Math.abs(coor2.vel) - coor2.loss2);
+    else
+      coor2.vel = 0;
+  }
+}
+function animate() {
+  if (ball.x.vel == 0 && ball.y.vel == 0) {
+    ball.radius = Math.random() * ((canvas.width - 6) * 0.1 - 1) + 10;
+    ball.mass = ball.density * Math.PI * Math.pow(ball.radius, 2);
+    ball.x.pos = Math.random() * (canvas.width - 2 * ball.radius - 4) + ball.radius + 2;
+    ball.y.pos = Math.random() * (canvas.height - 2 * ball.radius - 4) + ball.radius + 2;
+    ball.x.vel = Math.random() * 100 - 50;
+    ball.y.vel = Math.random() * 100 - 50;
+  }
+  move(ball.x, ball.y, ball.radius + 2, canvas.width - ball.radius - 2);
+  move(ball.y, ball.x, ball.radius + 2, canvas.height - ball.radius - 2);
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  Draw.rectangle(1, 1, canvas.width - 2, canvas.height - 2);
+  Draw.circle(ball.x.pos, ball.y.pos, ball.radius);
+  reqID = requestAnimationFrame(animate);
+  document.getElementById('x').value = ball.x.pos.toFixed(3);
+  document.getElementById('y').value = ball.y.pos.toFixed(3);
+  document.getElementById('vx').value = ball.x.vel.toFixed(3);
+  document.getElementById('vy').value = ball.y.vel.toFixed(3);
+}
+function reanimate() {
+  cancelAnimationFrame(reqID);
+  ball.x.vel = ball.y.vel = 0;
+  animate();
+}
+var reqID;
+document.getElementById('ax').value = ball.x.acc.toFixed(3)*10;
+document.getElementById('ay').value = ball.y.acc.toFixed(3)*10;
+animate();
+</script>
+</section>
+</article>
+</main>
+</body>
+</html>
