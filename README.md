@@ -2,7 +2,7 @@
 
 This JavaScript program simulates a ball bouncing in a dual-gravity environment where acceleration can be set by the user in the horizontal (ax) and vertical (ay) directions. Changing ax or ay will take an immediate effect.
 
-Visit https://idea.isnew.info/html5.html#canvas-animation for a demo.
+Visit https://idea.isnew.info/elastic-collision.html for a demo.
 
 ## License
 
