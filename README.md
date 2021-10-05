@@ -6,7 +6,7 @@ Visit https://idea.isnew.info/elastic-collision.html for a demo.
 
 ## License
 
-Copyright (C) 2017, 2019, Huidae Cho <<https://idea.isnew.info>>
+Copyright (C) 2017, 2019, Huidae Cho <<https://idea.isnew.info/>>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
